@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace AnimalManagement
 {
@@ -16,32 +18,52 @@ namespace AnimalManagement
         {
             InitializeComponent();
         }
+
         int index;
-        bool fedit = false;
+        bool isEdit = false;
+        bool isAdd = false;
         int n = 0;
+
         AnimalManagement[] pLists = new AnimalManagement[100];
 
         OpenFileDialog openFileDialog1 = new OpenFileDialog();
 
         private void btnAddNew_Click(object sender, EventArgs e)
         {
-
-            if (CheckInput())
+            if (!isAdd)
             {
-                AnimalManagement a = new AnimalManagement();
-                a.nameAnimal = txtName.Text;
-                a.idAnimal = txtID.Text;
-                a.typeAnimal = cboxType.SelectedItem.ToString();
-                a.imageAnimal = openFileDialog1.FileName;
-                a.fromAnimal = txtNational.Text;
-                pLists[n] = a;
-                n++;
-                LoadData(pLists);
-                MessageBox.Show(this, "Successfully added!!!", 
-                    "Result", 
-                    MessageBoxButtons.OK, 
-                    MessageBoxIcon.Information); 
+                btnAddNew.Text = "Save";
+                txtID.Enabled = true;
+                txtName.Enabled = true;
+                txtNational.Enabled = true;
+                cboxType.Enabled = true;
             }
+            else
+            {
+                if (CheckInput())
+                {
+                    AnimalManagement a = new AnimalManagement(); 
+                    a.nameAnimal = txtName.Text;
+                    a.idAnimal = txtID.Text;
+                    a.typeAnimal = cboxType.SelectedItem.ToString();
+                    a.imageAnimal = openFileDialog1.FileName;
+                    a.fromAnimal = txtNational.Text;
+                    pLists[n] = a;
+                    n++;
+                    btnAddNew.Text = "Add New";
+                    LoadData(pLists);
+                    MessageBox.Show(this, "Successfully added!!!",
+                        "Result",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+
+                    txtID.Enabled = false;
+                    txtName.Enabled = false;
+                    txtNational.Enabled = false;
+                    cboxType.Enabled = false;
+                }
+            }
+            isAdd = !isAdd;
 
             txtName.Text = null;
             txtID.Text = null;
@@ -49,6 +71,7 @@ namespace AnimalManagement
             cboxType.SelectedIndex = 0;
             txtNational.Text = null;
             pBoxImage.Image = null;
+
         }
 
         private bool CheckInput()
@@ -99,9 +122,9 @@ namespace AnimalManagement
 
         private void btnBrowse_Click(object sender, EventArgs e)
         {
-            openFileDialog1.InitialDirectory = "D:\\";
+            openFileDialog1.InitialDirectory = "D:\\";  
             openFileDialog1.RestoreDirectory = true;
-            openFileDialog1.Filter = "(*.jpg)|*.jpg|(*.png)|*.png|(*.gif)|*.gif|(*.*)|*.*";
+            openFileDialog1.Filter = "(*.jpg)|*.jpg|(*.png)|*.png|(*.gif)|*.gif|(*jpeg)|*jpeg|(*.*)|*.*";
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 txtImage.Text = openFileDialog1.FileName;
@@ -157,23 +180,31 @@ namespace AnimalManagement
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            if (!fedit)
+            if (!isEdit)
             {
                 btnUpdate.Text = "Save";
+                txtID.Enabled = true;
+                txtName.Enabled = true;
+                txtNational.Enabled = true;
+                cboxType.Enabled = true;
             }
             else
             {
-                AnimalManagement a = pLists[index];
-                a.nameAnimal = txtName.Text;
-                a.idAnimal = txtID.Text;
-                a.typeAnimal = cboxType.SelectedItem.ToString();
-                a.imageAnimal = txtImage.Text;
-                btnUpdate.Text = "Update";
-                LoadData(pLists);
-                MessageBox.Show(this, "Update successful!!!", "Result", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    AnimalManagement a = pLists[index];
+                    a.nameAnimal = txtName.Text;
+                    a.idAnimal = txtID.Text;
+                    a.typeAnimal = cboxType.SelectedItem.ToString();
+                    a.imageAnimal = txtImage.Text;
+                    btnUpdate.Text = "Edit";
+                    LoadData(pLists);
+                    MessageBox.Show(this, "Edited successful!!!", "Result", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
+                    txtID.Enabled = false;
+                    txtName.Enabled = false;
+                    txtNational.Enabled = false;
+                    cboxType.Enabled = false;
             }
-            fedit = !fedit;
+            isEdit = !isEdit;
 
             txtName.Text = null;
             txtID.Text = null;
@@ -185,9 +216,9 @@ namespace AnimalManagement
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show(this, "Do you want to delete?", 
-                "Question", 
-                MessageBoxButtons.YesNo, 
+            if (MessageBox.Show(this, "Do you want to delete?",
+                "Question",
+                MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 while (index < n - 1)
@@ -195,14 +226,15 @@ namespace AnimalManagement
                     pLists[index] = pLists[index + 1];
                     index++;
                 }
+
+                pLists[n - 1] = null;
+                n = n - 1;
+                LoadData(pLists);
+                MessageBox.Show(this, "Delete successful!!!",
+                    "Result",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
             }
-            pLists[n - 1] = null;
-            n = n-1;
-            LoadData(pLists);
-            MessageBox.Show(this, "Delete successful!!!", 
-                "Result", 
-                MessageBoxButtons.OK, 
-                MessageBoxIcon.Information);
 
             txtName.Text = null;
             txtID.Text = null;
@@ -214,7 +246,10 @@ namespace AnimalManagement
 
         private void Management_Load(object sender, EventArgs e)
         {
-
+            txtID.Enabled = false;
+            txtName.Enabled = false;
+            txtNational.Enabled = false;
+            cboxType.Enabled = false;
         }
     }
 }
